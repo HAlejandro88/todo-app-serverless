@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  todo-app
+
+  Sample SAM Template for todo-app
+  
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+Resources:
+  TaskList:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: task/
+      Handler: app.taskList
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaskTable
+      Environment:
+        Variables:
+          GREETINGS_TABLE: !Ref TaskTable
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api 
+          Properties:
+            Path: /list
+            Method: get
+  CreateTask:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: task/
+      Handler: app.createTask
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaskTable
+      Environment:
+        Variables:
+          GREETINGS_TABLE: !Ref TaskTable
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api 
+          Properties:
+            Path: /create
+            Method: post
+  UpdateTaskStatus:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: task/
+      Handler: app.updateTaskStatus
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaskTable
+      Environment:
+        Variables:
+          GREETINGS_TABLE: !Ref TaskTable
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api 
+          Properties:
+            Path: /update/{id}
+            Method: post 
+  DeleteTask:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: task/
+      Handler: app.deleteTask
+      Runtime: nodejs18.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TaskTable
+      Environment:
+        Variables:
+          GREETINGS_TABLE: !Ref TaskTable
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api 
+          Properties:
+            Path: /delete/{id}
+            Method: get                        
+  TaskTable:
+    Type: AWS::Serverless::SimpleTable 
+
+Outputs:
+  TaskApi:
+    Description: "API Gateway endpoint URL for Prod stage for Task function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/task/"
+
